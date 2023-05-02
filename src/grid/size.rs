@@ -1,6 +1,7 @@
 use std::fmt;
 use crate::grid::utils::parse_i8_tuple;
 
+#[derive(Clone, Copy)]
 pub struct Size {
     pub width: i8,
     pub height: i8

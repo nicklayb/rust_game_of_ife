@@ -1,5 +1,6 @@
 use std::fmt;
 
+#[derive(Clone)]
 pub enum Cell {
     Alive,
     Dead
@@ -8,7 +9,7 @@ pub enum Cell {
 impl fmt::Display for Cell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let output = match self {
-            Cell::Dead => ' ',
+            Cell::Dead => '_',
             Cell::Alive => '▓'
         };
         write!(f, "{}", output)

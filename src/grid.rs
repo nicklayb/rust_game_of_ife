@@ -8,12 +8,45 @@ pub mod size;
 pub mod coordinate;
 mod utils;
 
+type InnerGrid = HashMap<Coordinate, Cell>;
+
+#[derive(Clone)]
 pub struct Grid {
-    grid: HashMap<Coordinate, Cell>,
-    size: Size
+    grid: InnerGrid,
+    size: Size,
+    pub generation: u16
 }
 
 impl Grid {
+    pub fn parse(input: String) -> Option<Grid> {
+        let mut grid = HashMap::new();
+        let splitted: Vec<&str> = input.trim().split('\n').filter(|&char| !char.is_empty()).collect();
+        let mut width = 0;
+        let height = splitted.len();
+
+        splitted.iter().enumerate().for_each(|(row_index, line)| {
+            if row_index == 0 { width = line.len() }
+            if !line.is_empty() {
+                line.trim().split("").filter(|&char| !char.is_empty()).enumerate().for_each(|(column_index, cell)| {
+                    let value = match cell {
+                        "." => Cell::Dead,
+                        _ => Cell::Alive
+                    };
+                    if let Some((row, column)) = dual_usize_to_i8(row_index, column_index) {
+                        grid.insert(Coordinate::new(row, column), value);
+                    }
+                }) 
+            }
+        });
+
+        match dual_usize_to_i8(width, height) {
+            Some((width, height)) => 
+                Some(Grid { size: Size::new(width, height), grid, generation: 0 }),
+            _ =>
+                None
+        }
+    }
+
     pub fn new(size: Size) -> Grid {
         let mut grid = HashMap::new();
         for row_index in 0..size.height {
@@ -21,7 +54,16 @@ impl Grid {
                 grid.insert(Coordinate::new(row_index, column_index), Cell::Dead);
             }
         }
-        Grid { grid, size }
+        Grid { grid, size, generation: 0 }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        for (_, value) in self.grid.iter() {
+            if let Cell::Alive = value {
+                return false
+            }
+        }
+        true
     }
 
     pub fn get(&self, coordinate: Coordinate) -> Option<&Cell> {
@@ -68,23 +110,29 @@ impl Grid {
     }
 
     pub fn evolve(&mut self) {
-        for coordinate in self.grid.keys() {
-            self.evolve_cell(coordinate);
+        let old_grid = self.clone();
+        for coordinate in old_grid.grid.keys()  {
+            self.evolve_cell(coordinate, &old_grid);
+        }
+        self.bump_generation();
+    }
+
+    fn evolve_cell(&mut self, coordinate: &Coordinate, old_grid: &Grid) {
+        let count = old_grid.siblings(*coordinate).into_iter().fold(0, |acc, value| {
+            match value {
+                Some(Cell::Alive) => acc + 1,
+                _ => acc
+            }
+        });
+        match count {
+            3 => self.set_alive(*coordinate),
+            2 => (),
+            _ => self.set_dead(*coordinate)
         }
     }
 
-    fn evolve_cell(&mut self, coordinate: Coordinate) {
-        let mut count = 0;
-        for cell in self.siblings(coordinate) {
-            if let Some(Cell::Alive) = cell {
-                count = count + 1
-            }
-        }
-        match count {
-            3 => self.set_alive(coordinate),
-            2 => (),
-            _ => self.set_dead(coordinate)
-        }
+    fn bump_generation(&mut self) {
+        self.generation += 1
     }
 
     pub fn set_alive(&mut self, coordinate: Coordinate) {
@@ -97,6 +145,13 @@ impl Grid {
         if self.grid.contains_key(&coordinate) {
             self.grid.insert(coordinate, Cell::Dead);
         }
+    }
+}
+
+fn dual_usize_to_i8(first: usize, second: usize) -> Option<(i8, i8)> {
+    match (i8::try_from(first), i8::try_from(second)) {
+        (Ok(left), Ok(right)) => Some((left, right)),
+        _ => None
     }
 }
 

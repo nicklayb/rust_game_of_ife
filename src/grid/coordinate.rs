@@ -22,8 +22,4 @@ impl Coordinate {
         parse_i8_tuple(input, ',')
             .map(|(row_index, column_index)| Coordinate::new(row_index, column_index))
     }
-
-    pub fn origin() -> Coordinate {
-        Coordinate { row_index: 0, column_index: 0 }
-    }
 }
