@@ -229,6 +229,55 @@ mod tests {
     }
 
     #[test]
+    fn evolve() {
+        let mut grid = Grid::parse(String::from("
+                                            .OO
+                                            O..
+                                            .O.")).expect("Parses correctly");
+        assert_eq!(grid.generation, 0);
+
+        let expected_grid = Grid {
+            size: Size::new(3, 3),
+            grid: HashMap::from([
+                (Coordinate::new(0, 0), Cell::Dead),
+                (Coordinate::new(0, 1), Cell::Alive),
+                (Coordinate::new(0, 2), Cell::Alive),
+                (Coordinate::new(1, 0), Cell::Alive),
+                (Coordinate::new(1, 1), Cell::Dead),
+                (Coordinate::new(1, 2), Cell::Dead),
+                (Coordinate::new(2, 0), Cell::Alive),
+                (Coordinate::new(2, 1), Cell::Alive),
+                (Coordinate::new(2, 2), Cell::Dead)
+            ]),
+            generation: 1
+        };
+
+        grid.evolve();
+
+        assert_eq!(grid, expected_grid);
+
+        let expected_grid = Grid {
+            size: Size::new(3, 3),
+            grid: HashMap::from([
+                (Coordinate::new(0, 0), Cell::Dead),
+                (Coordinate::new(0, 1), Cell::Alive),
+                (Coordinate::new(0, 2), Cell::Alive),
+                (Coordinate::new(1, 0), Cell::Alive),
+                (Coordinate::new(1, 1), Cell::Dead),
+                (Coordinate::new(1, 2), Cell::Dead),
+                (Coordinate::new(2, 0), Cell::Alive),
+                (Coordinate::new(2, 1), Cell::Dead),
+                (Coordinate::new(2, 2), Cell::Dead)
+            ]),
+            generation: 2
+        };
+
+        grid.evolve();
+
+        assert_eq!(grid, expected_grid);
+    }
+
+    #[test]
     fn get() {
         let mut grid = Grid::new(Size::new(3, 3));
 
