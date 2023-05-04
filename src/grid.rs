@@ -28,11 +28,10 @@ impl Grid {
             if row_index == 0 { width = line.len() }
             if !line.is_empty() {
                 line.trim().split("").filter(|&char| !char.is_empty()).enumerate().for_each(|(column_index, cell)| {
-                    let value = match cell {
-                        "." => Cell::Dead,
-                        _ => Cell::Alive
-                    };
-                    if let Some((row, column)) = dual_usize_to_i8(row_index, column_index) {
+                    let coordinate_raw = dual_usize_to_i8(row_index, column_index);
+                    let value = Cell::parse(cell);
+
+                    if let (Some((row, column)), Some(value)) = (coordinate_raw, value) {
                         grid.insert(Coordinate::new(row, column), value);
                     }
                 }) 
