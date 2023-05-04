@@ -10,7 +10,7 @@ mod utils;
 
 type InnerGrid = HashMap<Coordinate, Cell>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Grid {
     grid: InnerGrid,
     size: Size,
@@ -169,5 +169,105 @@ impl fmt::Display for Grid {
         }
 
         write!(f, "{}", output)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+    use super::*;
+
+    #[test]
+    fn new() {
+        let grid = Grid::new(Size::new(3,3));
+        assert_eq!(grid, Grid {
+            size: Size::new(3, 3),
+            generation: 0,
+            grid: HashMap::from([
+                (Coordinate::new(0, 0), Cell::Dead),
+                (Coordinate::new(0, 1), Cell::Dead),
+                (Coordinate::new(0, 2), Cell::Dead),
+                (Coordinate::new(1, 0), Cell::Dead),
+                (Coordinate::new(1, 1), Cell::Dead),
+                (Coordinate::new(1, 2), Cell::Dead),
+                (Coordinate::new(2, 0), Cell::Dead),
+                (Coordinate::new(2, 1), Cell::Dead),
+                (Coordinate::new(2, 2), Cell::Dead)
+            ])
+        })
+    }
+
+    #[test]
+    fn parse() {
+        let grid = Grid::parse(String::from("...\n.O.\n.OO"));
+        assert_eq!(grid, Some(Grid {
+            size: Size::new(3, 3),
+            generation: 0,
+            grid: HashMap::from([
+                (Coordinate::new(0, 0), Cell::Dead),
+                (Coordinate::new(0, 1), Cell::Dead),
+                (Coordinate::new(0, 2), Cell::Dead),
+                (Coordinate::new(1, 0), Cell::Dead),
+                (Coordinate::new(1, 1), Cell::Alive),
+                (Coordinate::new(1, 2), Cell::Dead),
+                (Coordinate::new(2, 0), Cell::Dead),
+                (Coordinate::new(2, 1), Cell::Alive),
+                (Coordinate::new(2, 2), Cell::Alive)
+            ])
+        }))
+    }
+
+    #[test]
+    fn is_empty() {
+        let mut grid = Grid::new(Size::new(3, 3));
+
+        assert!(grid.is_empty());
+        
+        grid.set_alive(Coordinate::new(0,1));
+
+        assert!(!grid.is_empty());
+    }
+
+    #[test]
+    fn get() {
+        let mut grid = Grid::new(Size::new(3, 3));
+
+        let coordinate = Coordinate::new(0, 0);
+
+        assert_eq!(grid.get(coordinate), Some(&Cell::Dead));
+
+        grid.set_alive(coordinate);
+
+        assert_eq!(grid.get(coordinate), Some(&Cell::Alive));
+
+        assert_eq!(grid.get(Coordinate::new(10, 10)), None);
+    }
+
+    #[test]
+    fn set_alive() {
+        let mut grid = Grid::new(Size::new(3, 3));
+
+        let coordinate = Coordinate::new(0, 0);
+
+        assert_eq!(grid.get(coordinate), Some(&Cell::Dead));
+
+        grid.set_alive(coordinate);
+
+        assert_eq!(grid.get(coordinate), Some(&Cell::Alive));
+    }
+
+    #[test]
+    fn set_dead() {
+        let mut grid = Grid::new(Size::new(3, 3));
+
+        let coordinate = Coordinate::new(0, 0);
+
+        grid.set_alive(coordinate);
+
+        assert_eq!(grid.get(coordinate), Some(&Cell::Alive));
+
+        grid.set_dead(coordinate);
+
+        assert_eq!(grid.get(coordinate), Some(&Cell::Dead));
     }
 }

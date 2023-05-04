@@ -17,3 +17,17 @@ pub fn parse_i8_tuple(input: String, char: char) -> Option<(i8, i8)> {
         
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_i8_tuple() {
+        assert_eq!(parse_i8_tuple(String::from("1,2"), ','), Some((1, 2)));
+        assert_eq!(parse_i8_tuple(String::from("1x2"), 'x'), Some((1, 2)));
+        assert_eq!(parse_i8_tuple(String::from("1x"), 'x'), None);
+        assert_eq!(parse_i8_tuple(String::from(""), 'x'), None);
+        assert_eq!(parse_i8_tuple(String::from("c,b"), 'x'), None);
+    }
+}
