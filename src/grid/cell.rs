@@ -22,7 +22,7 @@ impl Cell {
 impl fmt::Display for Cell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let output = match self {
-            Cell::Dead => '_',
+            Cell::Dead => ' ',
             Cell::Alive => '▓'
         };
         write!(f, "{}", output)
